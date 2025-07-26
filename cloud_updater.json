@@ -1,0 +1,43 @@
+{
+    "WotVer": "1.29.0.1",
+    "ServerVer": "0.0.0.1",
+    "Author": "Under_Pressure",
+    
+    "SystemMessages": {
+        "InfoMessages": {
+            "Enabled": false,
+            "Messages": [        
+                "<font color='#008000' size='15'>MRVL ModPack</font>",
+                "<br><font color='#dbd7d2' size='13'>Додаткова інформація про модпак</font>",                 
+                "<textformat tabstops='[130]' leading='2'>",               
+                "<br><font color='#dbd7d2'>З повагою, {Author}</font>",
+                "</textformat>"        
+            ]
+        },    
+        "ActualMessages": {
+            "Enabled": true,
+            "Messages": [
+                "<font color='#020aeb' size='15'>MRVL ModPack</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Встановлено актуальну версію</font>",
+                "<textformat tabstops='[45]' leading='2'>",
+                "<font size='15' color='#dbd7d2'></font> <font size='13' color='#78dbe2'>{LocalVer}</font>",              
+                "</textformat>"        
+            ]    
+        },
+        "NewMessages": {
+            "Enabled": true,
+            "Messages": [
+                "<font color='#020aeb' size='15'>MRVL ModPack</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Доступна нова версія: {ServerVer}</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Встановлена: {LocalVer}</font>",
+                "<br>",
+                "<br><font color='#FFCC99' size='12'>Завантажте оновлення з офіційного джерела</font>",
+                "<textformat tabstops='[45]' leading='2'>", 
+                "</textformat>"        
+            ]
+        }                
+    }
+}
