@@ -1,5 +1,5 @@
 $PythonExe = "C:\Python27\python.exe"
-$PackerUser = "mrvl"
+$PackerUser = "Sh0kerix"
 $PackerName = "updater"
 $PackerVersion = "0.0.1"
 $PackerDescription = "None"

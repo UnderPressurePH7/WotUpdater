@@ -30,7 +30,6 @@ class Data(object):
         self.l_cfg = self.local_conf()
         self.s_cfg = self.server_conf()
         self.messageRepeat = True
-        print('[MRVL] install {}'.format(self.l_cfg['LocalVer'] if self.l_cfg else 'Unknown'))
 
     def comments(self, string, strip_space=True):
         tokenizer = re.compile(r'"|(/\*)|(\*/)|(//)|\n|\r')
@@ -79,7 +78,7 @@ class Data(object):
                 fileopen = json_file.read() 
             return loads(self.comments(fileopen))
         except Exception as Error:
-            print('[MRVL] Error local cfg: {}'.format(Error))
+            print('[ModPack] Error local cfg: {}'.format(Error))
             return None
 
     def server_conf(self):
@@ -91,7 +90,7 @@ class Data(object):
                 fileopen = fileopen.decode('utf-8-sig')
             return loads(self.comments(fileopen))
         except Exception as Error:
-            print('[MRVL] Error server cfg: {}'.format(Error))
+            print('[ModPack] Error server cfg: {}'.format(Error))
             return None
 
     def get_localized_messages(self, message_type):
@@ -144,10 +143,10 @@ def onVehicleLoaded(self):
             server_version = data.s_cfg.get('WotVer', '')
             
             if current_version != server_version:
-                print('[MRVL] Version mismatch: current={}, server={} - continuing anyway'.format(
+                print('[ModPack] Version mismatch: current={}, server={} - continuing anyway'.format(
                     current_version, server_version))
         except Exception as e:
-            print('[MRVL] Version check error: {} - continuing anyway'.format(e))
+            print('[ModPack] Version check error: {} - continuing anyway'.format(e))
         
         Macros = {
             'ServerVer': data.s_cfg.get('ServerVer', ''),
@@ -200,7 +199,7 @@ def onVehicleLoaded(self):
         data.messageRepeat = False
         
     except Exception as e:
-        print('[MRVL] Error in onVehicleLoaded: {}'.format(e))
+        print('[ModPack] Error in onVehicleLoaded: {}'.format(e))
 
 data = Data()
 
