@@ -1,13 +1,121 @@
 {
-    "WotVer": "1.29.0.1",
+    "WotVer": "2.0.0.1",
     "ServerVer": "0.0.0.1",
     "Author": "Under_Pressure",
     
     "SystemMessages": {
+        "InfoMessages_uk": {
+            "Enabled": false,
+            "Messages": [        
+                "<font color='#008000' size='15'>Sh0kerix ModPack</font>",
+                "<br><font color='#dbd7d2' size='13'>Додаткова інформація про модпак</font>",                 
+                "<textformat tabstops='[130]' leading='2'>",               
+                "<br><font color='#dbd7d2'>З повагою, {Author}</font>",
+                "</textformat>"        
+            ]
+        },    
+        "ActualMessages_uk": {
+            "Enabled": true,
+            "Messages": [
+                "<font color='#020aeb' size='15'>Sh0kerix ModPack</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Встановлено актуальну версію</font>",
+                "<textformat tabstops='[45]' leading='2'>",
+                "<font size='15' color='#dbd7d2'></font> <font size='13' color='#78dbe2'>{LocalVer}</font>",              
+                "</textformat>"        
+            ]    
+        },
+        "NewMessages_uk": {
+            "Enabled": true,
+            "Messages": [
+                "<font color='#020aeb' size='15'>Sh0kerix ModPack</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Доступна нова версія: {ServerVer}</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Встановлена: {LocalVer}</font>",
+                "<br>",
+                "<br><font color='#FFCC99' size='12'>Завантажте оновлення з офіційного джерела</font>",
+                "<textformat tabstops='[45]' leading='2'>", 
+                "</textformat>"        
+            ]
+        },
+
+        "InfoMessages_ru": {
+            "Enabled": false,
+            "Messages": [        
+                "<font color='#008000' size='15'>Sh0kerix ModPack</font>",
+                "<br><font color='#dbd7d2' size='13'>Дополнительная информация о модпаке</font>",                 
+                "<textformat tabstops='[130]' leading='2'>",               
+                "<br><font color='#dbd7d2'>С уважением, {Author}</font>",
+                "</textformat>"        
+            ]
+        },    
+        "ActualMessages_ru": {
+            "Enabled": true,
+            "Messages": [
+                "<font color='#020aeb' size='15'>Sh0kerix ModPack</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Установлена актуальная версия</font>",
+                "<textformat tabstops='[45]' leading='2'>",
+                "<font size='15' color='#dbd7d2'></font> <font size='13' color='#78dbe2'>{LocalVer}</font>",              
+                "</textformat>"        
+            ]    
+        },
+        "NewMessages_ru": {
+            "Enabled": true,
+            "Messages": [
+                "<font color='#020aeb' size='15'>Sh0kerix ModPack</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Доступна новая версия: {ServerVer}</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Установлена: {LocalVer}</font>",
+                "<br>",
+                "<br><font color='#FFCC99' size='12'>Загрузите обновление с официального источника</font>",
+                "<textformat tabstops='[45]' leading='2'>", 
+                "</textformat>"        
+            ]
+        },
+
+        "InfoMessages_en": {
+            "Enabled": false,
+            "Messages": [        
+                "<font color='#008000' size='15'>Sh0kerix ModPack</font>",
+                "<br><font color='#dbd7d2' size='13'>Additional modpack information</font>",                 
+                "<textformat tabstops='[130]' leading='2'>",               
+                "<br><font color='#dbd7d2'>Best regards, {Author}</font>",
+                "</textformat>"        
+            ]
+        },    
+        "ActualMessages_en": {
+            "Enabled": true,
+            "Messages": [
+                "<font color='#020aeb' size='15'>Sh0kerix ModPack</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Current version installed</font>",
+                "<textformat tabstops='[45]' leading='2'>",
+                "<font size='15' color='#dbd7d2'></font> <font size='13' color='#78dbe2'>{LocalVer}</font>",              
+                "</textformat>"        
+            ]    
+        },
+        "NewMessages_en": {
+            "Enabled": true,
+            "Messages": [
+                "<font color='#020aeb' size='15'>Sh0kerix ModPack</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>New version available: {ServerVer}</font>",
+                "<br>",
+                "<font color='#dbd7d2' size='13'>Installed: {LocalVer}</font>",
+                "<br>",
+                "<br><font color='#FFCC99' size='12'>Download update from official source</font>",
+                "<textformat tabstops='[45]' leading='2'>", 
+                "</textformat>"        
+            ]
+        },
+
         "InfoMessages": {
             "Enabled": false,
             "Messages": [        
-                "<font color='#008000' size='15'>MRVL ModPack</font>",
+                "<font color='#008000' size='15'>Sh0kerix ModPack</font>",
                 "<br><font color='#dbd7d2' size='13'>Додаткова інформація про модпак</font>",                 
                 "<textformat tabstops='[130]' leading='2'>",               
                 "<br><font color='#dbd7d2'>З повагою, {Author}</font>",
@@ -17,7 +125,7 @@
         "ActualMessages": {
             "Enabled": true,
             "Messages": [
-                "<font color='#020aeb' size='15'>MRVL ModPack</font>",
+                "<font color='#020aeb' size='15'>Sh0kerix ModPack</font>",
                 "<br>",
                 "<font color='#dbd7d2' size='13'>Встановлено актуальну версію</font>",
                 "<textformat tabstops='[45]' leading='2'>",
@@ -28,7 +136,7 @@
         "NewMessages": {
             "Enabled": true,
             "Messages": [
-                "<font color='#020aeb' size='15'>MRVL ModPack</font>",
+                "<font color='#020aeb' size='15'>Sh0kerix ModPack</font>",
                 "<br>",
                 "<font color='#dbd7d2' size='13'>Доступна нова версія: {ServerVer}</font>",
                 "<br>",

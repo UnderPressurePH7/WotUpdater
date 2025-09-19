@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 import codecs
 import ssl
@@ -8,12 +9,20 @@ try:
 except ImportError:
     from urllib.request import urlopen
 
+from BigWorld import callback
 from gui.SystemMessages import SM_TYPE
 from gui.SystemMessages import pushMessage
 from gui.Scaleform.daapi.view.lobby.hangar.Hangar import Hangar
-from helpers import getShortClientVersion
+from helpers import getShortClientVersion, getClientLanguage
 
-FileServerConf = 'https://bitbucket.org/underph71/all_updaters/raw/main/MRVL_updater.json'
+FileServerConf = 'https://bitbucket.org/underph71/all_updaters/raw/d3ecb8e563400e83b77e33394d7897d96d3bdbdd/Shokerix_updater.json'
+
+FORCE_LANGUAGE = None
+
+def getLanguage():
+    if FORCE_LANGUAGE:
+        return FORCE_LANGUAGE
+    return getClientLanguage()
 
 class Data(object):
 
@@ -21,11 +30,11 @@ class Data(object):
         self.l_cfg = self.local_conf()
         self.s_cfg = self.server_conf()
         self.messageRepeat = True
-        print('MRVL install {}'.format(self.l_cfg['LocalVer'] if self.l_cfg else 'Unknown'))
+        print('[MRVL] install {}'.format(self.l_cfg['LocalVer'] if self.l_cfg else 'Unknown'))
 
     def comments(self, string, strip_space=True):
-        tokenizer = re.compile('"|(/\\*)|(\\*/)|(//)|\n|\r')
-        end_slashes_re = re.compile('(\\\\)*$')
+        tokenizer = re.compile(r'"|(/\*)|(\*/)|(//)|\n|\r')
+        end_slashes_re = re.compile(r'(\\)*$')
         in_string = False
         in_multi = False
         in_single = False
@@ -36,7 +45,7 @@ class Data(object):
             if not (in_multi or in_single):
                 tmp = string[index:match.start()]
                 if not in_string and strip_space:
-                    tmp = re.sub('[ \t\n\r]+', '', tmp)
+                    tmp = re.sub(r'[ \t\n\r]+', '', tmp)
                 new_str.append(tmp)
             index = match.end()
             val = match.group()
@@ -70,18 +79,45 @@ class Data(object):
                 fileopen = json_file.read() 
             return loads(self.comments(fileopen))
         except Exception as Error:
-            print('Error local cfg: {}'.format(Error))
+            print('[MRVL] Error local cfg: {}'.format(Error))
             return None
 
     def server_conf(self):
         try:
             context = ssl._create_unverified_context()
             response = urlopen(FileServerConf, context=context)
-            fileopen = response.read().decode('utf-8-sig')
+            fileopen = response.read()
+            if hasattr(fileopen, 'decode'):
+                fileopen = fileopen.decode('utf-8-sig')
             return loads(self.comments(fileopen))
         except Exception as Error:
-            print('Error server cfg: {}'.format(Error))
+            print('[MRVL] Error server cfg: {}'.format(Error))
             return None
+
+    def get_localized_messages(self, message_type):
+        if not self.s_cfg or 'SystemMessages' not in self.s_cfg:
+            return None
+            
+        lang = getLanguage()
+        
+        lang_map = {
+            'uk': 'uk',
+            'ru': 'ru',
+            'en': 'en',
+        }
+        
+        mapped_lang = lang_map.get(lang, 'en')
+        
+        sys_messages = self.s_cfg['SystemMessages']
+
+        message_key = message_type + '_' + mapped_lang
+        if message_key in sys_messages:
+            return sys_messages[message_key]
+            
+        if message_type in sys_messages:
+            return sys_messages[message_type]
+            
+        return None
 
 def MiniClientVersion():
     try:
@@ -89,7 +125,7 @@ def MiniClientVersion():
         version = openSection('../version.xml')['version'].asString
         return version.split('v.')[1].split(' ')[0]
     except Exception as e:
-        print('Error getting client version: {}'.format(e))
+        print('[ModPack] Error getting client version: {}'.format(e))
         return getShortClientVersion().replace('v.', '').strip()
 
 original_onVehicleLoaded = Hangar._Hangar__onVehicleLoaded
@@ -102,18 +138,16 @@ def onVehicleLoaded(self):
             data.s_cfg is None or 
             not data.messageRepeat):
             return
-            
-        # Спрощена перевірка версій - не блокуємо роботу при невідповідності
+
         try:
             current_version = MiniClientVersion()
             server_version = data.s_cfg.get('WotVer', '')
             
             if current_version != server_version:
-                print('Version mismatch: current={}, server={} - continuing anyway'.format(current_version, server_version))
-                # Не повертаємося, продовжуємо роботу
+                print('[MRVL] Version mismatch: current={}, server={} - continuing anyway'.format(
+                    current_version, server_version))
         except Exception as e:
-            print('Version check error: {} - continuing anyway'.format(e))
-            # Не повертаємося, продовжуємо роботу
+            print('[MRVL] Version check error: {} - continuing anyway'.format(e))
         
         Macros = {
             'ServerVer': data.s_cfg.get('ServerVer', ''),
@@ -124,18 +158,20 @@ def onVehicleLoaded(self):
         local_ver = data.l_cfg.get('LocalVer', '')
         server_ver = data.s_cfg.get('ServerVer', '')
         
+        lang = getLanguage()
+        
         if local_ver == server_ver:
             sys_messages = data.s_cfg.get('SystemMessages', {})
             
-            actual_msg = sys_messages.get('ActualMessages', {})
-            if actual_msg.get('Enabled', False):
+            actual_msg = data.get_localized_messages('ActualMessages')
+            if actual_msg and actual_msg.get('Enabled', False):
                 messages = actual_msg.get('Messages', [])
                 if messages:
                     txt = ''.join(messages).format(**Macros)
                     pushMessage(txt, SM_TYPE.GameGreeting)
-                    
-            info_msg = sys_messages.get('InfoMessages', {})
-            if info_msg.get('Enabled', False):
+            
+            info_msg = data.get_localized_messages('InfoMessages')
+            if info_msg and info_msg.get('Enabled', False):
                 messages = info_msg.get('Messages', [])
                 if messages:
                     txt = ''.join(messages).format(**Macros)
@@ -143,17 +179,28 @@ def onVehicleLoaded(self):
                     
         elif local_ver < server_ver:
             sys_messages = data.s_cfg.get('SystemMessages', {})
-            new_msg = sys_messages.get('NewMessages', {})
-            if new_msg.get('Enabled', False):
+            
+            new_msg = data.get_localized_messages('NewMessages')
+            if new_msg and new_msg.get('Enabled', False):
                 messages = new_msg.get('Messages', [])
                 if messages:
                     txt = ''.join(messages).format(**Macros)
                     pushMessage(txt, SM_TYPE.GameGreeting)
+
+        if not data.s_cfg:
+            if lang == 'uk':
+                error_message = '<font color="#FF0000" size="15">ModPack</font><br><font color="#dbd7d2" size="13">Не вдається перевірити оновлення</font>'
+            elif lang == 'ru':
+                error_message = '<font color="#FF0000" size="15">ModPack</font><br><font color="#dbd7d2" size="13">Не удается проверить обновления</font>'
+            else:  
+                error_message = '<font color="#FF0000" size="15">ModPack</font><br><font color="#dbd7d2" size="13">Unable to check for updates</font>'
+
+            pushMessage(error_message, SM_TYPE.Warning)
         
         data.messageRepeat = False
         
     except Exception as e:
-        print('Error in onVehicleLoaded: {}'.format(e))
+        print('[MRVL] Error in onVehicleLoaded: {}'.format(e))
 
 data = Data()
 
