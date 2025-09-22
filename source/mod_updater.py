@@ -14,7 +14,7 @@ from gui.SystemMessages import pushMessage
 from gui.Scaleform.daapi.view.lobby.hangar.Hangar import Hangar
 from helpers import getShortClientVersion, getClientLanguage
 
-FileServerConf = 'https://bitbucket.org/underph71/all_updaters/raw/main/ModPack_updater.json'
+FileServerConf = 'https://bitbucket.org/underph71/all_updaters/raw/main/Shokerix_updater.json'
 
 FORCE_LANGUAGE = None 
 
