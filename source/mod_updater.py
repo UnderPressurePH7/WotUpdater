@@ -11,20 +11,40 @@ except ImportError:
 
 from gui.SystemMessages import SM_TYPE
 from gui.SystemMessages import pushMessage  
-from gui.Scaleform.daapi.view.lobby.hangar.Hangar import Hangar
+from gui.shared import g_eventBus
+from gui.shared import events
 from helpers import getShortClientVersion, getClientLanguage
 
 FileServerConf = 'https://bitbucket.org/underph71/all_updaters/raw/main/Shokerix_updater.json'
 
+__version__ = "0.0.1" 
+__author__ = "Under_Pressure"
+__copyright__ = "Copyright 2025, Under_Pressure"
+__mod_name__ = "Updater"
+
+
+DEBUG_MODE = False
 FORCE_LANGUAGE = None 
+avc_messagesShown = False
+
+def print_log(log):
+    print("[ModPack]: {}".format(str(log)))
+
+def print_error(log):
+    print("[ModPack] [ERROR]: {}".format(str(log)))
+
+def print_debug(log):
+    global DEBUG_MODE
+    if DEBUG_MODE:
+        print("[ModPack] [DEBUG]: {}".format(str(log)))
 
 def getLanguage():
     if FORCE_LANGUAGE:
-        print('[ModPack] Forced language: {}'.format(FORCE_LANGUAGE))
+        print_debug('Forced language: {}'.format(FORCE_LANGUAGE))
         return FORCE_LANGUAGE
     
     lang = getClientLanguage()
-    print('[ModPack] Auto-detected language: {}'.format(lang))
+    print_debug('Auto-detected language: {}'.format(lang))
     return lang
 
 class Data(object):
@@ -33,7 +53,7 @@ class Data(object):
         self.l_cfg = self.local_conf()
         self.s_cfg = self.server_conf()
         self.messageRepeat = True
-        print('[ModPack] install {}'.format(self.l_cfg['LocalVer'] if self.l_cfg else 'Unknown'))
+        print_debug('install {}'.format(self.l_cfg['LocalVer'] if self.l_cfg else 'Unknown'))
 
     def comments(self, string, strip_space=True):
         tokenizer = re.compile(r'"|(/\*)|(\*/)|(//)|\n|\r')
@@ -79,10 +99,10 @@ class Data(object):
             with codecs.open(cfg_file, mode='r', encoding='utf-8-sig') as json_file:
                 fileopen = json_file.read() 
             config = loads(self.comments(fileopen))
-            print('[ModPack] Local config loaded successfully')
+            print_debug('Local config loaded successfully')
             return config
         except Exception as Error:
-            print('[ModPack] Error local cfg: {}'.format(Error))
+            print_error('Error local cfg: {}'.format(Error))
             return None
 
     def server_conf(self):
@@ -93,19 +113,19 @@ class Data(object):
             if hasattr(fileopen, 'decode'):
                 fileopen = fileopen.decode('utf-8-sig')
             config = loads(self.comments(fileopen))
-            print('[ModPack] Server config loaded successfully')
+            print_debug('Server config loaded successfully')
             return config
         except Exception as Error:
-            print('[ModPack] Error server cfg: {}'.format(Error))
+            print_error('Error server cfg: {}'.format(Error))
             return None
 
     def get_localized_messages(self, message_type):
         if not self.s_cfg or 'SystemMessages' not in self.s_cfg:
-            print('[ModPack] No server config or SystemMessages section')
+            print_debug('No server config or SystemMessages section')
             return None
             
         lang = getLanguage()
-        print('[ModPack] Getting messages for language: {}'.format(lang))
+        print_debug('Getting messages for language: {}'.format(lang))
         
         lang_map = {
             'uk': 'uk',
@@ -114,22 +134,22 @@ class Data(object):
         }
         
         mapped_lang = lang_map.get(lang, 'en')
-        print('[ModPack] Mapped language: {} -> {}'.format(lang, mapped_lang))
+        print_debug('Mapped language: {} -> {}'.format(lang, mapped_lang))
         
         sys_messages = self.s_cfg['SystemMessages']
         
         message_key = message_type + '_' + mapped_lang
-        print('[ModPack] Looking for message key: {}'.format(message_key))
+        print_debug('Looking for message key: {}'.format(message_key))
         
         if message_key in sys_messages:
-            print('[ModPack] Found localized messages for: {}'.format(message_key))
+            print_debug('Found localized messages for: {}'.format(message_key))
             return sys_messages[message_key]
             
         if message_type in sys_messages:
-            print('[ModPack] Using fallback messages for: {}'.format(message_type))
+            print_debug('Using fallback messages for: {}'.format(message_type))
             return sys_messages[message_type]
             
-        print('[ModPack] No messages found for: {}'.format(message_type))
+        print_debug('No messages found for: {}'.format(message_type))
         return None
 
 def MiniClientVersion():
@@ -138,40 +158,35 @@ def MiniClientVersion():
         version = openSection('../version.xml')['version'].asString
         return version.split('v.')[1].split(' ')[0]
     except Exception as e:
-        print('[ModPack] Error getting client version: {}'.format(e))
+        print_error('Error getting client version: {}'.format(e))
         return getShortClientVersion().replace('v.', '').strip()
 
-original_onVehicleLoaded = Hangar._Hangar__onVehicleLoaded
-
-def onVehicleLoaded(self):
-    print('[ModPack] onVehicleLoaded called')
+def handleLobbyViewLoaded(_):
+    global avc_messagesShown
+    
+    if avc_messagesShown:
+        print_debug('Messages already shown, skipping')
+        return
+    
+    print_debug('Lobby view loaded - processing messages')
 
     try:
-        original_onVehicleLoaded(self)
-        print('[ModPack] Original onVehicleLoaded completed')
-        
-        if not hasattr(data, 'messageRepeat') or not data.messageRepeat:
-            print('[ModPack] Messages already shown, skipping')
-            return
-            
         if not data.l_cfg:
-            print('[ModPack] No local config, skipping')
+            print_debug('No local config, skipping')
             return
             
         if not data.s_cfg:
-            print('[ModPack] No server config, showing error message')
+            print_debug('No server config, showing error message')
             lang = getLanguage()
-            if lang in ['uk', 'ua']:
+            if lang == 'uk':
                 error_msg = '<font color="#FF0000" size="15">ModPack</font><br><font color="#dbd7d2" size="13">Не вдається перевірити оновлення</font>'
             elif lang == 'ru':
-                error_msg = '<font color="#FF0000" size="15">ModPack</font><br><font color="#dbd7d2" size="13">Не удається перевірити оновлення</font>'
-            elif lang == 'ru':
-                error_msg = '<font color="#FF0000" size="15">ModPack</font><br><font color="#dbd7d2" size="13">Не удається перевірити оновлення</font>'
+                error_msg = '<font color="#FF0000" size="15">ModPack</font><br><font color="#dbd7d2" size="13">Не удается проверить обновления</font>'
             else:
                 error_msg = '<font color="#FF0000" size="15">ModPack</font><br><font color="#dbd7d2" size="13">Unable to check for updates</font>'
             
             pushMessage(error_msg, SM_TYPE.Warning)
-            data.messageRepeat = False
+            avc_messagesShown = True
             return
             
         macros = {
@@ -180,23 +195,22 @@ def onVehicleLoaded(self):
             'Author': data.s_cfg.get('Author', '')
         }
 
-        print('[ModPack] Using macros: {}'.format(macros))
+        print_debug('Using macros: {}'.format(macros))
 
         local_ver = data.l_cfg.get('LocalVer', '')
         server_ver = data.s_cfg.get('ServerVer', '')
 
-        print('[ModPack] Version comparison: local={}, server={}'.format(local_ver, server_ver))
+        print_debug('Version comparison: local={}, server={}'.format(local_ver, server_ver))
 
         if local_ver == server_ver:
-
-            print('[ModPack] Versions match - showing actual messages')
+            print_debug('Versions match - showing actual messages')
 
             actual_msg = data.get_localized_messages('ActualMessages')
             if actual_msg and actual_msg.get('Enabled', False):
                 messages = actual_msg.get('Messages', [])
                 if messages:
                     txt = ''.join(messages).format(**macros)
-                    print('[ModPack] Showing actual message: {}'.format(txt[:100]))
+                    print_debug('Showing actual message: {}'.format(txt[:100]))
                     pushMessage(txt, SM_TYPE.GameGreeting)
             
             info_msg = data.get_localized_messages('InfoMessages')
@@ -204,35 +218,41 @@ def onVehicleLoaded(self):
                 messages = info_msg.get('Messages', [])
                 if messages:
                     txt = ''.join(messages).format(**macros)
-                    print('[ModPack] Showing info message: {}'.format(txt[:100]))
+                    print_debug('Showing info message: {}'.format(txt[:100]))
                     pushMessage(txt, SM_TYPE.GameGreeting)
                     
         elif local_ver < server_ver:
-            print('[ModPack] New version available - showing update messages')
+            print_debug('New version available - showing update messages')
             
             new_msg = data.get_localized_messages('NewMessages')
             if new_msg and new_msg.get('Enabled', False):
                 messages = new_msg.get('Messages', [])
                 if messages:
                     txt = ''.join(messages).format(**macros)
-                    print('[ModPack] Showing new version message: {}'.format(txt[:100]))
+                    print_debug('Showing new version message: {}'.format(txt[:100]))
                     pushMessage(txt, SM_TYPE.GameGreeting)
         else:
-            print('[ModPack] Local version is newer than server version')
+            print_debug('Local version is newer than server version')
         
-        data.messageRepeat = False
-        print('[ModPack] Message processing completed')
+        avc_messagesShown = True
+        print_debug('Message processing completed')
         
     except Exception as e:
-        print('[ModPack] Error in onVehicleLoaded: {}'.format(e))
+        print_error('Error in handleLobbyViewLoaded: {}'.format(e))
         import traceback
         traceback.print_exc()
 
 
-print('[ModPack] Initializing mod...')
-data = Data()
+data = None
 
-print('[ModPack] Patching Hangar._Hangar__onVehicleLoaded')
-Hangar._Hangar__onVehicleLoaded = onVehicleLoaded
+def init():
+    global data
+    print_log('MOD {} START LOADING: v{}'. format(__mod_name__, __version__))
+    data = Data()
+    g_eventBus.addListener(events.GUICommonEvent.LOBBY_VIEW_LOADED, handleLobbyViewLoaded)
 
-print('[ModPack] Mod initialization completed')
+def fini():
+    global data
+    print_log('MOD {} START FINALIZING'.format(__mod_name__))
+    g_eventBus.removeListener(events.GUICommonEvent.LOBBY_VIEW_LOADED, handleLobbyViewLoaded)
+    data = None
